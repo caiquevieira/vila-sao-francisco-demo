@@ -11,6 +11,7 @@
   const contagem = secao.querySelector('[data-mapa-contagem]');
   const tela = secao.querySelector('[data-mapa-tela]');
   const aviso = secao.querySelector('[data-mapa-aviso]');
+  const dica = secao.querySelector('[data-mapa-dica]');
   const MSG = encodeURIComponent('Olá! Encontrei vocês no guia Vila São Francisco.');
   const ARVORE = '<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 1.5a5 5 0 0 0-4.8 3.7A4.6 4.6 0 0 0 3.5 9.8a4.5 4.5 0 0 0 1.7 3.5A4.4 4.4 0 0 0 9.4 17H11v4H8.5a1 1 0 0 0 0 2h7a1 1 0 0 0 0-2H13v-4h1.6a4.4 4.4 0 0 0 4.2-3.7 4.5 4.5 0 0 0 1.7-3.5 4.6 4.6 0 0 0-3.7-4.6A5 5 0 0 0 12 1.5z"/></svg>';
 
@@ -136,6 +137,22 @@
     // Roda do mouse só depois de clicar no mapa (não prende a rolagem da página)
     mapa.on('click', () => mapa.scrollWheelZoom.enable());
     tela.addEventListener('mouseleave', () => mapa.scrollWheelZoom.disable());
+    // Toque: arrastar com um dedo só depois de tocar no mapa; ao sair da tela, volta a rolar a página
+    if (!ponteiroFino) {
+      const liberar = () => {
+        mapa.dragging.enable();
+        dica.hidden = true;
+      };
+      dica.hidden = false;
+      mapa.on('click popupopen', liberar);
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver((e) => {
+          if (e[0].isIntersecting) return;
+          mapa.dragging.disable();
+          dica.hidden = false;
+        }).observe(tela);
+      }
+    }
 
     itens.forEach((l) => {
       const icone = L.divIcon({
